@@ -2,11 +2,14 @@
 using CodeCool.SeasonalProductDiscounter.Model.Offers;
 using CodeCool.SeasonalProductDiscounter.Service.Discounts;
 using CodeCool.SeasonalProductDiscounter.Service.Products;
+using CodeCool.SeasonalProductDiscounter.Service.Logger;
+
 
 namespace CodeCool.SeasonalProductDiscounter.Ui;
 
 public class SeasonalProductDiscounterUi
 {
+    private readonly ILogger _logger;
     private readonly IProductProvider _productProvider;
     private readonly IDiscountProvider _discountProvider;
     private readonly IDiscounterService _discounterService;
@@ -14,11 +17,13 @@ public class SeasonalProductDiscounterUi
     public SeasonalProductDiscounterUi(
         IProductProvider productProvider,
         IDiscountProvider discountProvider,
-        IDiscounterService discounterService)
+        IDiscounterService discounterService,
+        ILogger consoleLogger)
     {
         _productProvider = productProvider;
         _discountProvider = discountProvider;
         _discounterService = discounterService;
+        _logger = consoleLogger;
     }
 
     public void Run()
@@ -53,6 +58,8 @@ public class SeasonalProductDiscounterUi
     private void PrintOffers(DateTime date)
     {
         var discounted = GetOffers(date);
+        if (discounted.Count == 0) _logger.LogError($"On {date} there are no offers for these products!");
+        else _logger.LogInfo("The Offers with discounts have been created!");
         PrintEnumerable(discounted);
     }
 
@@ -61,7 +68,7 @@ public class SeasonalProductDiscounterUi
         List<Offer> discounted = new();
         foreach (var product in _productProvider.Products)
         {
-            var offer = _discounterService.GetOffer(product, date);
+            var offer = _discounterService.GetOffer(product, date, _discountProvider);
             if (offer.Discounts.Any())
             {
                 discounted.Add(offer);

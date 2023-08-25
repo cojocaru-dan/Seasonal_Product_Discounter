@@ -1,15 +1,20 @@
 ﻿using CodeCool.SeasonalProductDiscounter.Model.Enums;
 using CodeCool.SeasonalProductDiscounter.Model.Products;
+using CodeCool.SeasonalProductDiscounter.Service.Logger;
+
 
 namespace CodeCool.SeasonalProductDiscounter.Service.Products;
 
 public class ProductProvider : IProductProvider
 {
+    private readonly ILogger _logger;
     public IEnumerable<Product> Products { get; }
 
-    public ProductProvider()
+    public ProductProvider(ILogger consoleLogger)
     {
         Products = GetProducts();
+        _logger = consoleLogger;
+        _logger.LogInfo("All Products have been created!");
     }
 
     private static IEnumerable<Product> GetProducts()
